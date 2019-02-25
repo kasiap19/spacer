@@ -1,23 +1,47 @@
 <template>
   <div id="app">
       <div class="wrapper">
-        <Background />
+      <Background />
       <Claim />
-      <SearchInput />
+      <SearchInput v-model="searchValue" @input="handleInput" />
     </div>
   </div>
 </template>
 <script>
+import axios from 'axios';
+import debounce from 'lodash.debounce';
+
 import Claim from '@/components/Claim.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import Background from '@/components/Background.vue';
 
 const API = 'https://images-api.nasa.gov/search';
+
 export default {
   components : {
     Background,
     Claim,
     SearchInput
+  },
+
+    data() {
+    return {
+      searchValue: '',
+      results: [],
+    }
+  },
+  methods: {
+    handleInput: debounce(function(){
+      console.log(this.searchValue);
+      axios.get(`${API}?q=${this.searchValue}&media_type=image`)
+      .then((response) => {
+        this.results = response.data.collection.items;
+        console.log(this.results);
+      })
+      .catch((error) => {
+        console.log(error)
+      });
+    }, 500)
   },
 }
 </script>
